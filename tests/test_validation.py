@@ -28,7 +28,7 @@ def test_model_timeout_default():
 
 
 def test_max_generation_tokens_default():
-    assert config.MAX_GENERATION_TOKENS == 4096
+    assert config.MAX_GENERATION_TOKENS == 1024
 
 
 def test_allowed_origins_default():

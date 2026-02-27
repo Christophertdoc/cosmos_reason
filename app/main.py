@@ -2,6 +2,8 @@ import logging
 import time
 from pathlib import Path
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
@@ -11,11 +13,17 @@ import httpx
 
 from app import config
 from app.image_utils import compress_image
-from app.llama_client import LlamaClientError, analyze_image
+from app.llama_client import LlamaClientError, analyze_image, close_client
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Cosmos Reason2 Inference")
+@asynccontextmanager
+async def lifespan(app):
+    yield
+    await close_client()
+
+
+app = FastAPI(title="Cosmos Reason2 Inference", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -23,6 +31,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 STATIC_DIR = Path(__file__).parent / "static"
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")

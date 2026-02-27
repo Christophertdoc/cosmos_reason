@@ -108,7 +108,7 @@ All settings are configurable via environment variables:
 | `MAX_UPLOAD_MB` | `8` | Max image upload size (MB) |
 | `MAX_PROMPT_LENGTH` | `2000` | Max prompt characters |
 | `MODEL_TIMEOUT_SECONDS` | `120` | llama-server request timeout (seconds) |
-| `MAX_GENERATION_TOKENS` | `4096` | Max tokens for model output |
+| `MAX_GENERATION_TOKENS` | `1024` | Max tokens for model output |
 | `ALLOWED_ORIGINS` | `http://localhost:8000` | CORS allowed origins (comma-separated) |
 
 ## Troubleshooting
@@ -126,7 +126,7 @@ curl http://localhost:8080/health
 ```
 
 **Slow responses**
-Ensure all GPU layers are offloaded (default: `-ngl 99`). First request may be slower due to model warmup.
+Images over 100 KB are automatically compressed and resized server-side before inference. Ensure all GPU layers are offloaded (default: `-ngl 99`). First request may be slower due to model warmup.
 
 **Out of memory**
 Reduce context size: `CTX_SIZE=4096 ./scripts/start_llama_server.sh`

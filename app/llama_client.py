@@ -9,6 +9,25 @@ class LlamaClientError(Exception):
     """Raised when the llama-server is unreachable or returns an error."""
 
 
+_client: httpx.AsyncClient | None = None
+
+
+def _get_client() -> httpx.AsyncClient:
+    global _client
+    if _client is None or _client.is_closed:
+        _client = httpx.AsyncClient(
+            timeout=httpx.Timeout(config.MODEL_TIMEOUT_SECONDS),
+        )
+    return _client
+
+
+async def close_client() -> None:
+    global _client
+    if _client is not None and not _client.is_closed:
+        await _client.aclose()
+        _client = None
+
+
 async def analyze_image(image_bytes: bytes, mime_type: str, prompt: str) -> str:
     """Send an image and prompt to llama-server and return the model's response text.
 
@@ -33,14 +52,12 @@ async def analyze_image(image_bytes: bytes, mime_type: str, prompt: str) -> str:
     }
 
     try:
-        async with httpx.AsyncClient(
-            timeout=httpx.Timeout(config.MODEL_TIMEOUT_SECONDS)
-        ) as client:
-            response = await client.post(
-                f"{config.LLAMA_SERVER_URL}/v1/chat/completions",
-                json=payload,
-            )
-            response.raise_for_status()
+        client = _get_client()
+        response = await client.post(
+            f"{config.LLAMA_SERVER_URL}/v1/chat/completions",
+            json=payload,
+        )
+        response.raise_for_status()
     except (httpx.ConnectError, httpx.TimeoutException) as exc:
         raise LlamaClientError("Inference backend is temporarily unavailable") from exc
     except httpx.HTTPStatusError as exc:
