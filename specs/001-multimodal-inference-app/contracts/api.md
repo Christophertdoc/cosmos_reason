@@ -1,4 +1,4 @@
-# API Contract: Cosmos Reason2 Multimodal Inference
+# API Contract: Cosmos Reason2 Inference
 
 **Date**: 2026-02-25
 **Base URL**: `http://localhost:8000`

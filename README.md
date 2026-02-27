@@ -1,4 +1,4 @@
-# Cosmos Reason2 Multimodal Inference
+# Cosmos Reason2 Inference
 
 World models have some understanding of how the physical world works ... they're used for autonomous driving, robotics, and interactive virtual environments. But they typically require large amounts of compute to run.
 

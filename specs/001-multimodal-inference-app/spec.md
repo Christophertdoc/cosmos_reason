@@ -1,4 +1,4 @@
-# Feature Specification: Cosmos Reason2 Multimodal Inference Web Application
+# Feature Specification: Cosmos Reason2 Inference Web Application
 
 **Feature Branch**: `001-multimodal-inference-app`
 **Created**: 2026-02-25

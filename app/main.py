@@ -14,7 +14,7 @@ from app.llama_client import LlamaClientError, analyze_image
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Cosmos Reason2 Multimodal Inference")
+app = FastAPI(title="Cosmos Reason2 Inference")
 
 app.add_middleware(
     CORSMiddleware,

@@ -1,4 +1,4 @@
-# Implementation Plan: Cosmos Reason2 Multimodal Inference Web Application
+# Implementation Plan: Cosmos Reason2 Inference Web Application
 
 **Branch**: `001-multimodal-inference-app` | **Date**: 2026-02-25 | **Spec**: [spec.md](./spec.md)
 **Input**: Feature specification from `/specs/001-multimodal-inference-app/spec.md`

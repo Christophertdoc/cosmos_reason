@@ -1,4 +1,4 @@
-# Quickstart: Cosmos Reason2 Multimodal Inference Web Application
+# Quickstart: Cosmos Reason2 Inference Web Application
 
 **Branch**: `001-multimodal-inference-app`
 

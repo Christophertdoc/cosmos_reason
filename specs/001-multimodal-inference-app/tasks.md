@@ -1,4 +1,4 @@
-# Tasks: Cosmos Reason2 Multimodal Inference Web Application
+# Tasks: Cosmos Reason2 Inference Web Application
 
 **Input**: Design documents from `/specs/001-multimodal-inference-app/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/

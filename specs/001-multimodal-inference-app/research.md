@@ -1,4 +1,4 @@
-# Research: Cosmos Reason2 Multimodal Inference Web Application
+# Research: Cosmos Reason2 Inference Web Application
 
 **Date**: 2026-02-25
 **Branch**: `001-multimodal-inference-app`

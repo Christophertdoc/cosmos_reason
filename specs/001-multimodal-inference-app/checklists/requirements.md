@@ -1,4 +1,4 @@
-# Specification Quality Checklist: Cosmos Reason2 Multimodal Inference Web Application
+# Specification Quality Checklist: Cosmos Reason2 Inference Web Application
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
 **Created**: 2026-02-25
