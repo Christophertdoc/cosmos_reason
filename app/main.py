@@ -1,3 +1,4 @@
+import json
 import logging
 import time
 from pathlib import Path
@@ -8,12 +9,13 @@ from fastapi import FastAPI, Request, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from sse_starlette.sse import EventSourceResponse
 
 import httpx
 
 from app import config
 from app.image_utils import compress_image
-from app.llama_client import LlamaClientError, analyze_image, close_client
+from app.llama_client import LlamaClientError, analyze_image, stream_analyze_image, close_client
 
 logger = logging.getLogger(__name__)
 
@@ -132,3 +134,59 @@ async def analyze(image: UploadFile, prompt: str = Form("")) -> JSONResponse:
             "llama_server_url": config.LLAMA_SERVER_URL,
         }
     )
+
+
+@app.post("/api/analyze/stream")
+async def analyze_stream(image: UploadFile, prompt: str = Form("")):
+    # Validate image MIME type
+    if image.content_type not in config.ALLOWED_MIME_TYPES:
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": f"Unsupported file type. Allowed: {', '.join(sorted(config.ALLOWED_MIME_TYPES))}",
+                "field": "image",
+            },
+        )
+
+    # Read and validate image size
+    image_bytes = await image.read()
+    if len(image_bytes) > config.MAX_UPLOAD_BYTES:
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": f"File size exceeds the {config.MAX_UPLOAD_MB} MB limit",
+                "field": "image",
+            },
+        )
+
+    # Validate prompt
+    prompt = prompt.strip()
+    if not prompt:
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Prompt is required", "field": "prompt"},
+        )
+    if len(prompt) > config.MAX_PROMPT_LENGTH:
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": f"Prompt exceeds maximum length of {config.MAX_PROMPT_LENGTH} characters",
+                "field": "prompt",
+            },
+        )
+
+    # Compress image if over 100 KB
+    image_bytes, mime_type = compress_image(image_bytes, image.content_type)
+
+    async def event_generator():
+        start = time.monotonic()
+        try:
+            async for event in stream_analyze_image(image_bytes, mime_type, prompt):
+                yield json.dumps(event)
+        except LlamaClientError:
+            yield json.dumps({"error": "Inference backend is temporarily unavailable"})
+            return
+        elapsed_ms = int((time.monotonic() - start) * 1000)
+        yield json.dumps({"done": True, "latency_ms": elapsed_ms})
+
+    return EventSourceResponse(event_generator())

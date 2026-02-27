@@ -67,4 +67,6 @@ exec llama-server \
     -c "${CTX_SIZE}" \
     -t "${THREADS}" \
     -b "${BATCH_SIZE}" \
-    --port "${PORT}"
+    --port "${PORT}" \
+    --jinja \
+    --reasoning-format deepseek

@@ -108,6 +108,65 @@ body {
     opacity: 0;
 }
 
+.result-overlay .phase-label {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: bold;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.15em 0.6em;
+    border-radius: 4px;
+    margin-top: 1.2rem;
+    margin-bottom: 0.4rem;
+}
+
+.result-overlay .phase-label:first-child {
+    margin-top: 0;
+}
+
+.result-overlay .phase-label.observing {
+    color: #000;
+    background: rgba(100, 180, 255, 0.85);
+}
+
+.result-overlay .phase-label.reasoning {
+    color: #000;
+    background: rgba(255, 200, 0, 0.85);
+}
+
+.result-overlay .phase-label.concluding {
+    color: #000;
+    background: rgba(0, 255, 65, 0.85);
+}
+
+.result-overlay .observe-block {
+    color: rgba(100, 180, 255, 0.8);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    border-left: 2px solid rgba(100, 180, 255, 0.3);
+    padding-left: 1rem;
+    margin: 0.4rem 0 0.5rem 0;
+    white-space: pre-wrap;
+}
+
+.result-overlay .reason-block {
+    color: rgba(255, 200, 0, 0.8);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    border-left: 2px solid rgba(255, 200, 0, 0.3);
+    padding-left: 1rem;
+    margin: 0.4rem 0 0.5rem 0;
+    white-space: pre-wrap;
+}
+
+.result-overlay .conclude-block {
+    color: #00ff41;
+    font-size: 1.8rem;
+    line-height: 1.7;
+    margin: 0.4rem 0 0.5rem 0;
+    white-space: pre-wrap;
+}
+
 .result-overlay .answer-text.animate-in {
     animation: textScrollIn 4.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }

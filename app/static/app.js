@@ -21,6 +21,7 @@
 
     let selectedFile = null;
     let autoScrollId = null;
+    let activeAbortController = null;
 
     // --- Upload Zone: click and drag-and-drop ---
 
@@ -134,6 +135,10 @@
 
     closeResult.addEventListener("click", function () {
         stopAutoScroll();
+        if (activeAbortController) {
+            activeAbortController.abort();
+            activeAbortController = null;
+        }
         resultOverlay.hidden = true;
     });
 
@@ -197,36 +202,126 @@
         formData.append("image", selectedFile);
         formData.append("prompt", promptInput.value.trim());
 
+        // Abort any previous stream
+        if (activeAbortController) {
+            activeAbortController.abort();
+        }
+        activeAbortController = new AbortController();
+
         try {
-            const response = await fetch("/api/analyze", {
+            const response = await fetch("/api/analyze/stream", {
                 method: "POST",
                 body: formData,
+                signal: activeAbortController.signal,
             });
 
-            const data = await response.json();
-
-            if (response.ok) {
-                answerText.classList.remove("animate-in");
-                latencyDisplay.classList.remove("animate-in");
-                answerText.textContent = data.answer;
-                latencyDisplay.textContent = "Inference time: " + data.latency_ms + " ms";
-                resultOverlay.hidden = false;
-                // Force reflow then trigger animation
-                void answerText.offsetWidth;
-                answerText.classList.add("animate-in");
-                latencyDisplay.classList.add("animate-in");
-                // Start auto-scroll after entrance animation
-                stopAutoScroll();
-                resultOverlay.scrollTop = 0;
-                setTimeout(startAutoScroll, 3000);
-            } else {
+            if (!response.ok) {
+                const data = await response.json();
                 showError(promptError, data.error || "An unexpected error occurred");
                 resultOverlay.hidden = true;
+                setLoading(false);
+                return;
+            }
+
+            // Prepare overlay for streaming
+            answerText.classList.remove("animate-in");
+            latencyDisplay.classList.remove("animate-in");
+            answerText.innerHTML = "";
+            latencyDisplay.textContent = "";
+            answerText.style.opacity = "1";
+            latencyDisplay.style.opacity = "";
+            resultOverlay.scrollTop = 0;
+            let receivedFirstToken = false;
+
+            // Phase blocks — created on demand when that phase starts
+            let thinkBlock = null;
+            let contentBlock = null;
+
+            function ensureThinkBlock() {
+                if (thinkBlock) return;
+                var label = document.createElement("div");
+                label.className = "phase-label reasoning";
+                label.textContent = "Reasoning";
+                answerText.appendChild(label);
+                thinkBlock = document.createElement("div");
+                thinkBlock.className = "reason-block";
+                answerText.appendChild(thinkBlock);
+            }
+
+            function ensureContentBlock() {
+                if (contentBlock) return;
+                var label = document.createElement("div");
+                label.className = "phase-label concluding";
+                label.textContent = "Answer";
+                answerText.appendChild(label);
+                contentBlock = document.createElement("div");
+                contentBlock.className = "conclude-block";
+                answerText.appendChild(contentBlock);
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = "";
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split("\n");
+                buffer = lines.pop();
+
+                for (const line of lines) {
+                    const trimmed = line.trim();
+                    if (!trimmed || !trimmed.startsWith("data:")) continue;
+                    const dataStr = trimmed.slice(5).trim();
+                    if (!dataStr) continue;
+
+                    let parsed;
+                    try {
+                        parsed = JSON.parse(dataStr);
+                    } catch {
+                        continue;
+                    }
+
+                    if (parsed.error) {
+                        showError(promptError, parsed.error);
+                        resultOverlay.hidden = true;
+                        setLoading(false);
+                        return;
+                    }
+
+                    if (parsed.token) {
+                        if (!receivedFirstToken) {
+                            receivedFirstToken = true;
+                            resultOverlay.hidden = false;
+                            loadingIndicator.hidden = true;
+                        }
+
+                        if (parsed.type === "thinking") {
+                            ensureThinkBlock();
+                            thinkBlock.textContent += parsed.token;
+                        } else {
+                            // "content" type, or fallback
+                            ensureContentBlock();
+                            contentBlock.textContent += parsed.token;
+                        }
+                    }
+
+                    if (parsed.done) {
+                        latencyDisplay.textContent = "Inference time: " + parsed.latency_ms + " ms";
+                        latencyDisplay.style.opacity = "1";
+                        stopAutoScroll();
+                        startAutoScroll();
+                    }
+                }
             }
         } catch (err) {
+            if (err.name === "AbortError") return;
             showError(promptError, "Service temporarily unavailable");
             resultOverlay.hidden = true;
         } finally {
+            activeAbortController = null;
             setLoading(false);
         }
     });
