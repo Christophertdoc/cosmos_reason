@@ -14,9 +14,21 @@ body {
 }
 
 .container {
-    max-width: 720px;
+    max-width: 1200px;
     margin: 2rem auto;
     padding: 0 1.5rem;
+}
+
+.two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+@media (max-width: 768px) {
+    .two-col {
+        grid-template-columns: 1fr;
+    }
 }
 
 h1 {

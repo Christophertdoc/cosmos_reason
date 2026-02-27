@@ -11,36 +11,42 @@
         <h1>Cosmos Reason2</h1>
         <p class="subtitle">Upload an image, ask a question</p>
 
-        <div class="upload-zone" id="uploadZone">
-            <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" hidden>
-            <div class="upload-placeholder" id="uploadPlaceholder">
-                <span class="upload-icon">&#128247;</span>
-                <p>Drag image here or click to upload</p>
-                <p class="upload-hint">JPEG, PNG, or WebP (max 8 MB)</p>
+        <div class="two-col">
+            <div class="col-left">
+                <div class="upload-zone" id="uploadZone">
+                    <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" hidden>
+                    <div class="upload-placeholder" id="uploadPlaceholder">
+                        <span class="upload-icon">&#128247;</span>
+                        <p>Drag image here or click to upload</p>
+                        <p class="upload-hint">JPEG, PNG, or WebP (max 8 MB)</p>
+                    </div>
+                    <img id="imagePreview" class="image-preview" alt="Preview" hidden>
+                </div>
+                <div class="error-message" id="imageError"></div>
+
+                <label for="promptInput">Prompt</label>
+                <textarea id="promptInput" rows="3" placeholder="Describe what you want to know about the image..."></textarea>
+                <div class="error-message" id="promptError"></div>
+
+                <button id="analyzeBtn" type="button">Analyze</button>
             </div>
-            <img id="imagePreview" class="image-preview" alt="Preview" hidden>
-        </div>
-        <div class="error-message" id="imageError"></div>
 
-        <label for="promptInput">Prompt</label>
-        <textarea id="promptInput" rows="3" placeholder="Describe what you want to know about the image..."></textarea>
-        <div class="error-message" id="promptError"></div>
+            <div class="col-right">
+                <div id="loadingIndicator" class="loading" hidden>
+                    <div class="spinner"></div>
+                    <span>Analyzing image...</span>
+                </div>
 
-        <button id="analyzeBtn" type="button">Analyze</button>
+                <div id="resultArea" class="result-area" hidden>
+                    <h2>Result</h2>
+                    <div id="answerText" class="answer-text"></div>
+                    <div id="latencyDisplay" class="latency"></div>
+                </div>
 
-        <div id="loadingIndicator" class="loading" hidden>
-            <div class="spinner"></div>
-            <span>Analyzing image...</span>
-        </div>
-
-        <div id="resultArea" class="result-area" hidden>
-            <h2>Result</h2>
-            <div id="answerText" class="answer-text"></div>
-            <div id="latencyDisplay" class="latency"></div>
-        </div>
-
-        <div id="errorArea" class="error-area" hidden>
-            <p id="errorText"></p>
+                <div id="errorArea" class="error-area" hidden>
+                    <p id="errorText"></p>
+                </div>
+            </div>
         </div>
     </main>
 

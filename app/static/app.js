@@ -152,7 +152,7 @@
 
             if (response.ok) {
                 answerText.textContent = data.answer;
-                latencyDisplay.textContent = "Latency: " + data.latency_ms + " ms";
+                latencyDisplay.textContent = "Inference time: " + data.latency_ms + " ms";
                 resultArea.hidden = false;
                 errorArea.hidden = true;
             } else {
