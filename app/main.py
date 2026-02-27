@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 import httpx
 
 from app import config
+from app.image_utils import compress_image
 from app.llama_client import LlamaClientError, analyze_image
 
 logger = logging.getLogger(__name__)
@@ -99,10 +100,13 @@ async def analyze(image: UploadFile, prompt: str = Form("")) -> JSONResponse:
             },
         )
 
+    # Compress image if over 100 KB
+    image_bytes, mime_type = compress_image(image_bytes, image.content_type)
+
     # Call llama-server
     start = time.monotonic()
     try:
-        answer = await analyze_image(image_bytes, image.content_type, prompt)
+        answer = await analyze_image(image_bytes, mime_type, prompt)
     except LlamaClientError:
         return JSONResponse(
             status_code=503,
