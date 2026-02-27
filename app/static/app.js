@@ -237,6 +237,13 @@
             let thinkBlock = null;
             let contentBlock = null;
 
+            let thinkRaw = "";
+            let contentRaw = "";
+
+            function stripTags(str) {
+                return str.replace(/<\/?think>/g, "").replace(/<\/?answer>/g, "");
+            }
+
             function ensureThinkBlock() {
                 if (thinkBlock) return;
                 var label = document.createElement("div");
@@ -296,15 +303,17 @@
                             receivedFirstToken = true;
                             resultOverlay.hidden = false;
                             loadingIndicator.hidden = true;
+                            setTimeout(startAutoScroll, 3000);
                         }
 
                         if (parsed.type === "thinking") {
                             ensureThinkBlock();
-                            thinkBlock.textContent += parsed.token;
+                            thinkRaw += parsed.token;
+                            thinkBlock.textContent = stripTags(thinkRaw);
                         } else {
-                            // "content" type, or fallback
                             ensureContentBlock();
-                            contentBlock.textContent += parsed.token;
+                            contentRaw += parsed.token;
+                            contentBlock.textContent = stripTags(contentRaw);
                         }
                     }
 

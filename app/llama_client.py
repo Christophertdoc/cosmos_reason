@@ -11,7 +11,12 @@ class LlamaClientError(Exception):
     """Raised when the llama-server is unreachable or returns an error."""
 
 
-SYSTEM_PROMPT = "You are a helpful assistant."
+SYSTEM_PROMPT = (
+    "You are a helpful assistant that analyzes still images. "
+    "The user provides a single photograph, not a video. "
+    "Never refer to the input as a video, frame sequence, or clip. "
+    "Describe what you see as a single moment captured in a photograph."
+)
 
 # NVIDIA's documented format to trigger chain-of-thought reasoning
 # Matches the exact wording from the API docs curl example
@@ -125,7 +130,12 @@ async def stream_analyze_image(
                 if reasoning:
                     yield {"type": "thinking", "token": reasoning}
                 if content:
-                    yield {"type": "content", "token": content}
+                    # Strip any inline think/answer tags the server didn't remove
+                    cleaned = content
+                    for tag in ("<think>", "</think>", "<answer>", "</answer>"):
+                        cleaned = cleaned.replace(tag, "")
+                    if cleaned:
+                        yield {"type": "content", "token": cleaned}
     except (httpx.ConnectError, httpx.TimeoutException) as exc:
         raise LlamaClientError("Inference backend is temporarily unavailable") from exc
     except httpx.HTTPStatusError as exc:
