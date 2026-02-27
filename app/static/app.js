@@ -14,11 +14,9 @@
     const promptError = document.getElementById("promptError");
     const analyzeBtn = document.getElementById("analyzeBtn");
     const loadingIndicator = document.getElementById("loadingIndicator");
-    const resultArea = document.getElementById("resultArea");
+    const resultOverlay = document.getElementById("resultOverlay");
     const answerText = document.getElementById("answerText");
     const latencyDisplay = document.getElementById("latencyDisplay");
-    const errorArea = document.getElementById("errorArea");
-    const errorText = document.getElementById("errorText");
 
     let selectedFile = null;
 
@@ -126,12 +124,18 @@
         analyzeBtn.disabled = loading;
         loadingIndicator.hidden = !loading;
         if (loading) {
-            resultArea.hidden = true;
-            errorArea.hidden = true;
+            resultOverlay.hidden = true;
         }
     }
 
     // --- Submit ---
+
+    promptInput.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            analyzeBtn.click();
+        }
+    });
 
     analyzeBtn.addEventListener("click", async function () {
         if (!validateInputs()) return;
@@ -151,19 +155,22 @@
             const data = await response.json();
 
             if (response.ok) {
+                answerText.classList.remove("animate-in");
+                latencyDisplay.classList.remove("animate-in");
                 answerText.textContent = data.answer;
                 latencyDisplay.textContent = "Inference time: " + data.latency_ms + " ms";
-                resultArea.hidden = false;
-                errorArea.hidden = true;
+                resultOverlay.hidden = false;
+                // Force reflow then trigger animation
+                void answerText.offsetWidth;
+                answerText.classList.add("animate-in");
+                latencyDisplay.classList.add("animate-in");
             } else {
-                errorText.textContent = data.error || "An unexpected error occurred";
-                errorArea.hidden = false;
-                resultArea.hidden = true;
+                showError(promptError, data.error || "An unexpected error occurred");
+                resultOverlay.hidden = true;
             }
         } catch (err) {
-            errorText.textContent = "Service temporarily unavailable";
-            errorArea.hidden = false;
-            resultArea.hidden = true;
+            showError(promptError, "Service temporarily unavailable");
+            resultOverlay.hidden = true;
         } finally {
             setLoading(false);
         }
