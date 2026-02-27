@@ -6,11 +6,12 @@ Upload an image, enter a text prompt, and receive a natural language response fr
 
 ## Prerequisites
 
-- **macOS** with Apple Silicon (M3 Pro or similar, 18 GB+ RAM)
 - **Python 3.11+**
-- **llama.cpp b7480+** compiled with Metal support (required for `qwen3vl` architecture) — install with `brew install llama.cpp`
-- **huggingface-cli** (`pip install huggingface-hub`)
+- **llama.cpp b7480+** (required for `qwen3vl` architecture) — install with `brew install llama.cpp` on macOS or [build from source](https://github.com/ggml-org/llama.cpp)
+- **16 GB+ RAM** (the 2B BF16 model is ~4 GB plus KV cache)
 - ~6 GB disk space for model files
+
+Default settings in `scripts/start_llama_server.sh` are tuned for Apple Silicon with Metal GPU offload. For other platforms, adjust `GPU_LAYERS` and `THREADS` via environment variables (see [Configuration](#configuration)).
 
 ## Setup
 
