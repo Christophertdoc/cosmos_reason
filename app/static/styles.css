@@ -61,16 +61,21 @@ body {
     width: 50%;
     max-height: calc(100vh - 80px);
     overflow-y: auto;
+    scrollbar-width: none;
     padding: 2rem 2.5rem;
     background: linear-gradient(to right, rgba(0, 0, 0, 0.7) 70%, transparent);
     z-index: 10;
     pointer-events: none;
 }
 
+.result-overlay::-webkit-scrollbar {
+    display: none;
+}
+
 .result-overlay .answer-text {
     color: #00ff41;
     font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
-    font-size: 1rem;
+    font-size: 2rem;
     line-height: 1.7;
     white-space: pre-wrap;
     pointer-events: auto;
@@ -78,7 +83,7 @@ body {
 }
 
 .result-overlay .answer-text.animate-in {
-    animation: textScrollIn 2.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation: textScrollIn 4.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 @keyframes textScrollIn {
@@ -107,35 +112,27 @@ body {
 }
 
 .result-overlay .latency.animate-in {
-    animation: textScrollIn 1.4s cubic-bezier(0.22, 1, 0.36, 1) 1.2s forwards;
+    animation: textScrollIn 2.5s cubic-bezier(0.22, 1, 0.36, 1) 2.5s forwards;
 }
 
-/* Loading — centered overlay */
+/* Loading — centered pill */
 .loading {
     position: fixed;
-    inset: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
     gap: 0.75rem;
+    padding: 0.85rem 1.5rem;
     color: #ccc;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     z-index: 20;
     pointer-events: none;
-}
-
-.loading::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-}
-
-.loading > * {
-    position: relative;
-    z-index: 1;
 }
 
 .loading[hidden] {
@@ -175,13 +172,13 @@ body {
 .prompt-bar textarea {
     flex: 1;
     min-width: 0;
-    padding: 0.6rem 0.75rem;
+    padding: 0.8rem 1rem;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
+    border-radius: 10px;
     background: rgba(255, 255, 255, 0.05);
     color: #fff;
     font-family: inherit;
-    font-size: 0.95rem;
+    font-size: 2rem;
     resize: none;
     line-height: 1.4;
 }

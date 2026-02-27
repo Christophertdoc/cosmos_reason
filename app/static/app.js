@@ -19,6 +19,7 @@
     const latencyDisplay = document.getElementById("latencyDisplay");
 
     let selectedFile = null;
+    let autoScrollId = null;
 
     // --- Upload Zone: click and drag-and-drop ---
 
@@ -128,6 +129,37 @@
         }
     }
 
+    // --- Auto-scroll ---
+
+    function startAutoScroll() {
+        stopAutoScroll();
+        var PIXELS_PER_SECOND = 80;
+        var lastTime = null;
+
+        function step(timestamp) {
+            if (lastTime === null) lastTime = timestamp;
+            var delta = (timestamp - lastTime) / 1000;
+            lastTime = timestamp;
+
+            var maxScroll = resultOverlay.scrollHeight - resultOverlay.clientHeight;
+            if (maxScroll > 0 && resultOverlay.scrollTop < maxScroll) {
+                resultOverlay.scrollTop += PIXELS_PER_SECOND * delta;
+                autoScrollId = requestAnimationFrame(step);
+            } else {
+                autoScrollId = null;
+            }
+        }
+
+        autoScrollId = requestAnimationFrame(step);
+    }
+
+    function stopAutoScroll() {
+        if (autoScrollId !== null) {
+            cancelAnimationFrame(autoScrollId);
+            autoScrollId = null;
+        }
+    }
+
     // --- Submit ---
 
     promptInput.addEventListener("keydown", function (e) {
@@ -140,6 +172,7 @@
     analyzeBtn.addEventListener("click", async function () {
         if (!validateInputs()) return;
 
+        stopAutoScroll();
         setLoading(true);
 
         const formData = new FormData();
@@ -164,6 +197,10 @@
                 void answerText.offsetWidth;
                 answerText.classList.add("animate-in");
                 latencyDisplay.classList.add("animate-in");
+                // Start auto-scroll after entrance animation
+                stopAutoScroll();
+                resultOverlay.scrollTop = 0;
+                setTimeout(startAutoScroll, 3000);
             } else {
                 showError(promptError, data.error || "An unexpected error occurred");
                 resultOverlay.hidden = true;
