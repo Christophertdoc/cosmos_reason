@@ -42,7 +42,7 @@ llama-server handles split GGUF files natively — no merge required.
 ./scripts/start_llama_server.sh
 ```
 
-Default settings optimized for M3 Pro 18 GB:
+Default settings:
 - Port 8080
 - 99 GPU layers (full Metal offload)
 - 8192 context length
