@@ -1,8 +1,10 @@
 # Cosmos Reason2 Multimodal Inference
 
-A web application for multimodal image analysis powered by [Cosmos-Reason2-2B](https://huggingface.co/robertzty/Cosmos-Reason2-2B-GGUF) running via llama.cpp.
+World models have some understanding of how the physical world works ... they're used for autonomous driving, robotics, and interactive virtual environments. But they typically require large amounts of compute to run.
 
-Upload an image, enter a text prompt, and receive a natural language response from the model.
+This project lets you run [NVIDIA's Cosmos Reason](https://huggingface.co/nvidia/Cosmos-Reason2-2B) world model locally on consumer hardware. It uses [Tingyu Zhang's GGUF conversion](https://huggingface.co/robertzty/Cosmos-Reason2-2B-GGUF) of the model, paired with [llama.cpp](https://github.com/ggml-org/llama.cpp), a lightweight C++ engine that runs models locally without heavy GPU frameworks.
+
+Upload an image, enter a text prompt, and receive a natural language response from the model ... all running on your own machine.
 
 ## Prerequisites
 
@@ -128,48 +130,3 @@ Ensure all GPU layers are offloaded (default: `-ngl 99`). First request may be s
 
 **Out of memory**
 Reduce context size: `CTX_SIZE=4096 ./scripts/start_llama_server.sh`
-
-## Apple Silicon Performance Tuning
-
-- **GPU offload**: Use `-ngl 99` to offload all layers to Metal (default)
-- **Threads**: Set to match your performance core count (6 for M3 Pro, 8 for M3 Max)
-- **Context size**: 8192 is safe for 18 GB; reduce to 4096 if running other memory-intensive apps
-- **Batch size**: 512 is a good default; increase to 1024 if you have headroom
-- The 2B BF16 model (~4 GB) fits comfortably in 18 GB unified memory with ample room for KV cache
-
-## Project Structure
-
-```
-app/
-  main.py            # FastAPI application and endpoints
-  config.py          # Environment variable configuration
-  llama_client.py    # Async HTTP client for llama-server
-  static/
-    index.html       # Web UI
-    app.js           # Frontend logic
-    styles.css       # Styling
-tests/
-  test_api.py        # API integration tests
-  test_validation.py # Configuration validation tests
-  test_llama_client.py # Llama client unit tests
-scripts/
-  download_models.sh # Model download script
-  start_llama_server.sh # llama-server launcher
-examples/
-  sample_image.jpg   # Sample image for smoke testing
-```
-
-## Frontend Manual Test Checklist
-
-- [ ] Drag and drop image onto upload zone works
-- [ ] Click-to-upload via file picker works
-- [ ] Image preview renders immediately after selection
-- [ ] Loading spinner appears during request
-- [ ] Analyze button disables during request
-- [ ] Model answer renders correctly on success
-- [ ] Latency displays in milliseconds
-- [ ] Inline error for missing image
-- [ ] Inline error for empty prompt
-- [ ] Inline error for unsupported file type
-- [ ] Inline error for oversized file
-- [ ] Error message displays on server error (503)
