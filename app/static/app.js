@@ -15,6 +15,7 @@
     const analyzeBtn = document.getElementById("analyzeBtn");
     const loadingIndicator = document.getElementById("loadingIndicator");
     const resultOverlay = document.getElementById("resultOverlay");
+    const closeResult = document.getElementById("closeResult");
     const answerText = document.getElementById("answerText");
     const latencyDisplay = document.getElementById("latencyDisplay");
 
@@ -128,6 +129,23 @@
             resultOverlay.hidden = true;
         }
     }
+
+    // --- Close result ---
+
+    closeResult.addEventListener("click", function () {
+        stopAutoScroll();
+        resultOverlay.hidden = true;
+    });
+
+    // --- Stop auto-scroll on manual interaction ---
+
+    resultOverlay.addEventListener("wheel", function () {
+        stopAutoScroll();
+    });
+
+    resultOverlay.addEventListener("touchmove", function () {
+        stopAutoScroll();
+    });
 
     // --- Auto-scroll ---
 
