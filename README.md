@@ -22,7 +22,7 @@ Default settings in `scripts/start_llama_server.sh` are tuned for Apple Silicon 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -e ".[dev]" huggingface-hub
+pip install -r requirements.txt
 ```
 
 ### 2. Download Model Files
