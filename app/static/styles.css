@@ -80,8 +80,8 @@ body {
     padding: 0;
     font-size: 1.5rem;
     line-height: 1;
-    color: rgba(0, 255, 65, 0.6);
-    background: rgba(0, 255, 65, 0.1);
+    color: rgba(255, 200, 0, 0.6);
+    background: rgba(255, 200, 0, 0.1);
     border: none;
     border-radius: 50%;
     cursor: pointer;
@@ -91,8 +91,8 @@ body {
 }
 
 .close-result:hover {
-    color: #00ff41;
-    background: rgba(0, 255, 65, 0.2);
+    color: rgba(255, 200, 0, 1);
+    background: rgba(255, 200, 0, 0.2);
 }
 
 .result-overlay::-webkit-scrollbar {

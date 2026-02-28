@@ -243,6 +243,13 @@
             // Phase blocks — created on demand when that phase starts
             let thinkBlock = null;
             let contentBlock = null;
+            // Raw buffers to accumulate text before stripping tags
+            let thinkRaw = "";
+            let contentRaw = "";
+
+            function stripTags(text) {
+                return text.replace(/<\/?(?:think|answer)>/g, "");
+            }
 
             function ensureThinkBlock() {
                 if (thinkBlock) return;
@@ -305,17 +312,14 @@
                             loadingIndicator.hidden = true;
                         }
 
-                        // Strip <answer> / </answer> tags from content
-                        var token = parsed.token
-                            .replace(/<\/?answer>/g, "");
-
                         if (parsed.type === "thinking") {
                             ensureThinkBlock();
-                            thinkBlock.textContent += token;
+                            thinkRaw += parsed.token;
+                            thinkBlock.textContent = stripTags(thinkRaw);
                         } else {
-                            // "content" type, or fallback
                             ensureContentBlock();
-                            if (token) contentBlock.textContent += token;
+                            contentRaw += parsed.token;
+                            contentBlock.textContent = stripTags(contentRaw);
                         }
                     }
 
