@@ -12,6 +12,7 @@
     const videoError = document.getElementById("videoError");
     const promptInput = document.getElementById("promptInput");
     const promptError = document.getElementById("promptError");
+    const promptBar = document.getElementById("promptBar");
     const analyzeBtn = document.getElementById("analyzeBtn");
     const loadingIndicator = document.getElementById("loadingIndicator");
     const resultOverlay = document.getElementById("resultOverlay");
@@ -83,6 +84,7 @@
         videoPreview.hidden = false;
         videoPreview.play();
         uploadPlaceholder.hidden = true;
+        promptBar.hidden = false;
     }
 
     function hidePreview() {
@@ -94,6 +96,7 @@
             previewObjectUrl = null;
         }
         uploadPlaceholder.hidden = false;
+        promptBar.hidden = true;
     }
 
     // --- Validation ---
@@ -163,7 +166,7 @@
 
     function startAutoScroll() {
         stopAutoScroll();
-        var PIXELS_PER_SECOND = 80;
+        var PIXELS_PER_SECOND = 40;
         var lastTime = null;
 
         function step(timestamp) {
@@ -175,8 +178,12 @@
             if (maxScroll > 0 && resultOverlay.scrollTop < maxScroll) {
                 resultOverlay.scrollTop += PIXELS_PER_SECOND * delta;
             }
-            // Keep running while streaming — content may grow
-            autoScrollId = requestAnimationFrame(step);
+            // Keep running while content can still grow or scroll
+            if (maxScroll <= 0 || resultOverlay.scrollTop < maxScroll) {
+                autoScrollId = requestAnimationFrame(step);
+            } else {
+                autoScrollId = null;
+            }
         }
 
         autoScrollId = requestAnimationFrame(step);
@@ -326,7 +333,6 @@
                     if (parsed.done) {
                         latencyDisplay.textContent = "Inference time: " + parsed.latency_ms + " ms";
                         latencyDisplay.style.opacity = "1";
-                        stopAutoScroll();
                     }
                 }
             }
