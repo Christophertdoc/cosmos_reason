@@ -2,17 +2,23 @@ from app import config
 
 
 def test_allowed_mime_types():
-    assert "image/jpeg" in config.ALLOWED_MIME_TYPES
-    assert "image/png" in config.ALLOWED_MIME_TYPES
-    assert "image/webp" in config.ALLOWED_MIME_TYPES
+    assert "video/mp4" in config.ALLOWED_MIME_TYPES
+    assert "video/webm" in config.ALLOWED_MIME_TYPES
+    assert "video/quicktime" in config.ALLOWED_MIME_TYPES
+    assert "image/jpeg" not in config.ALLOWED_MIME_TYPES
+    assert "image/png" not in config.ALLOWED_MIME_TYPES
     assert "image/gif" not in config.ALLOWED_MIME_TYPES
-    assert "image/bmp" not in config.ALLOWED_MIME_TYPES
-    assert "application/pdf" not in config.ALLOWED_MIME_TYPES
 
 
 def test_max_upload_size():
-    assert config.MAX_UPLOAD_MB == 8
-    assert config.MAX_UPLOAD_BYTES == 8 * 1024 * 1024
+    assert config.MAX_UPLOAD_MB == 50
+    assert config.MAX_UPLOAD_BYTES == 50 * 1024 * 1024
+
+
+def test_video_settings():
+    assert config.MAX_VIDEO_DURATION_SECONDS == 10
+    assert config.MAX_FRAMES == 40
+    assert config.VIDEO_FPS == 4
 
 
 def test_max_prompt_length():
@@ -28,7 +34,7 @@ def test_model_timeout_default():
 
 
 def test_max_generation_tokens_default():
-    assert config.MAX_GENERATION_TOKENS == 1024
+    assert config.MAX_GENERATION_TOKENS == 4096
 
 
 def test_allowed_origins_default():

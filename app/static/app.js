@@ -1,17 +1,18 @@
 (function () {
     "use strict";
 
-    const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
-    const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8 MB
+    const ALLOWED_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
+    const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
     const MAX_PROMPT_LENGTH = 2000;
 
     const uploadZone = document.getElementById("uploadZone");
     const fileInput = document.getElementById("fileInput");
-    const imagePreview = document.getElementById("imagePreview");
+    const videoPreview = document.getElementById("videoPreview");
     const uploadPlaceholder = document.getElementById("uploadPlaceholder");
-    const imageError = document.getElementById("imageError");
+    const videoError = document.getElementById("videoError");
     const promptInput = document.getElementById("promptInput");
     const promptError = document.getElementById("promptError");
+    const promptBar = document.getElementById("promptBar");
     const analyzeBtn = document.getElementById("analyzeBtn");
     const loadingIndicator = document.getElementById("loadingIndicator");
     const resultOverlay = document.getElementById("resultOverlay");
@@ -22,6 +23,7 @@
     let selectedFile = null;
     let autoScrollId = null;
     let activeAbortController = null;
+    let previewObjectUrl = null;
 
     // --- Upload Zone: click and drag-and-drop ---
 
@@ -56,14 +58,14 @@
         clearErrors();
 
         if (!ALLOWED_TYPES.includes(file.type)) {
-            showError(imageError, "Unsupported file type. Please use JPEG, PNG, or WebP");
+            showError(videoError, "Unsupported file type. Please use MP4, WebM, or MOV");
             selectedFile = null;
             hidePreview();
             return;
         }
 
         if (file.size > MAX_FILE_SIZE) {
-            showError(imageError, "File size exceeds the 8 MB limit");
+            showError(videoError, "File size exceeds the 50 MB limit");
             selectedFile = null;
             hidePreview();
             return;
@@ -74,19 +76,27 @@
     }
 
     function showPreview(file) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            imagePreview.src = e.target.result;
-            imagePreview.hidden = false;
-            uploadPlaceholder.hidden = true;
-        };
-        reader.readAsDataURL(file);
+        if (previewObjectUrl) {
+            URL.revokeObjectURL(previewObjectUrl);
+        }
+        previewObjectUrl = URL.createObjectURL(file);
+        videoPreview.src = previewObjectUrl;
+        videoPreview.hidden = false;
+        videoPreview.play();
+        uploadPlaceholder.hidden = true;
+        promptBar.hidden = false;
     }
 
     function hidePreview() {
-        imagePreview.hidden = true;
-        imagePreview.src = "";
+        videoPreview.hidden = true;
+        videoPreview.pause();
+        videoPreview.src = "";
+        if (previewObjectUrl) {
+            URL.revokeObjectURL(previewObjectUrl);
+            previewObjectUrl = null;
+        }
         uploadPlaceholder.hidden = false;
+        promptBar.hidden = true;
     }
 
     // --- Validation ---
@@ -96,7 +106,7 @@
         clearErrors();
 
         if (!selectedFile) {
-            showError(imageError, "Please upload an image");
+            showError(videoError, "Please upload a video");
             valid = false;
         }
 
@@ -117,7 +127,7 @@
     }
 
     function clearErrors() {
-        imageError.textContent = "";
+        videoError.textContent = "";
         promptError.textContent = "";
     }
 
@@ -156,7 +166,7 @@
 
     function startAutoScroll() {
         stopAutoScroll();
-        var PIXELS_PER_SECOND = 80;
+        var PIXELS_PER_SECOND = 40;
         var lastTime = null;
 
         function step(timestamp) {
@@ -167,6 +177,9 @@
             var maxScroll = resultOverlay.scrollHeight - resultOverlay.clientHeight;
             if (maxScroll > 0 && resultOverlay.scrollTop < maxScroll) {
                 resultOverlay.scrollTop += PIXELS_PER_SECOND * delta;
+            }
+            // Keep running while content can still grow or scroll
+            if (maxScroll <= 0 || resultOverlay.scrollTop < maxScroll) {
                 autoScrollId = requestAnimationFrame(step);
             } else {
                 autoScrollId = null;
@@ -199,7 +212,7 @@
         setLoading(true);
 
         const formData = new FormData();
-        formData.append("image", selectedFile);
+        formData.append("video", selectedFile);
         formData.append("prompt", promptInput.value.trim());
 
         // Abort any previous stream
@@ -236,6 +249,13 @@
             // Phase blocks — created on demand when that phase starts
             let thinkBlock = null;
             let contentBlock = null;
+            // Raw buffers to accumulate text before stripping tags
+            let thinkRaw = "";
+            let contentRaw = "";
+
+            function stripTags(text) {
+                return text.replace(/<\/?(?:think|answer)>/g, "");
+            }
 
             let thinkRaw = "";
             let contentRaw = "";
@@ -320,8 +340,6 @@
                     if (parsed.done) {
                         latencyDisplay.textContent = "Inference time: " + parsed.latency_ms + " ms";
                         latencyDisplay.style.opacity = "1";
-                        stopAutoScroll();
-                        startAutoScroll();
                     }
                 }
             }
