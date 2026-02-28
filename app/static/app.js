@@ -257,12 +257,6 @@
                 return text.replace(/<\/?(?:think|answer)>/g, "");
             }
 
-            let thinkRaw = "";
-            let contentRaw = "";
-
-            function stripTags(str) {
-                return str.replace(/<\/?think>/g, "").replace(/<\/?answer>/g, "");
-            }
 
             function ensureThinkBlock() {
                 if (thinkBlock) return;

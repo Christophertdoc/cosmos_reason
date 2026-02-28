@@ -154,11 +154,7 @@ body {
 .result-overlay .reason-block {
     color: rgba(255, 200, 0, 0.8);
     font-size: 1.8rem;
-<<<<<<< HEAD
-    line-height: 1.7;
-=======
     line-height: 1.6;
->>>>>>> think
     border-left: 2px solid rgba(255, 200, 0, 0.3);
     padding-left: 1rem;
     margin: 0.4rem 0 0.5rem 0;

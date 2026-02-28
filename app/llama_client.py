@@ -11,16 +11,7 @@ class LlamaClientError(Exception):
     """Raised when the llama-server is unreachable or returns an error."""
 
 
-<<<<<<< HEAD
-SYSTEM_PROMPT = (
-    "You are a helpful assistant that analyzes still images. "
-    "The user provides a single photograph, not a video. "
-    "Never refer to the input as a video, frame sequence, or clip. "
-    "Describe what you see as a single moment captured in a photograph."
-)
-=======
 SYSTEM_PROMPT = "You are a helpful assistant that analyzes video content."
->>>>>>> think
 
 # NVIDIA's documented format to trigger chain-of-thought reasoning
 # Matches the exact wording from the API docs curl example
