@@ -62,6 +62,7 @@ def _build_payload(frames: list[tuple[bytes, str]], prompt: str, *, stream: bool
         "max_tokens": config.MAX_GENERATION_TOKENS,
         "temperature": 0.3,
         "top_p": 0.3,
+        "frequency_penalty": 0.6,
         "stream": stream,
     }
 
