@@ -174,10 +174,9 @@
             var maxScroll = resultOverlay.scrollHeight - resultOverlay.clientHeight;
             if (maxScroll > 0 && resultOverlay.scrollTop < maxScroll) {
                 resultOverlay.scrollTop += PIXELS_PER_SECOND * delta;
-                autoScrollId = requestAnimationFrame(step);
-            } else {
-                autoScrollId = null;
             }
+            // Keep running while streaming — content may grow
+            autoScrollId = requestAnimationFrame(step);
         }
 
         autoScrollId = requestAnimationFrame(step);
@@ -310,6 +309,7 @@
                             receivedFirstToken = true;
                             resultOverlay.hidden = false;
                             loadingIndicator.hidden = true;
+                            setTimeout(startAutoScroll, 3000);
                         }
 
                         if (parsed.type === "thinking") {
@@ -327,7 +327,6 @@
                         latencyDisplay.textContent = "Inference time: " + parsed.latency_ms + " ms";
                         latencyDisplay.style.opacity = "1";
                         stopAutoScroll();
-                        startAutoScroll();
                     }
                 }
             }
