@@ -16,7 +16,7 @@ def test_max_upload_size():
 
 
 def test_video_settings():
-    assert config.MAX_VIDEO_DURATION_SECONDS == 10
+    assert config.MAX_VIDEO_DURATION_SECONDS == 120
     assert config.MAX_FRAMES == 40
     assert config.VIDEO_FPS == 4
 

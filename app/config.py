@@ -14,6 +14,6 @@ ALLOWED_ORIGINS: list[str] = [
 ]
 
 ALLOWED_MIME_TYPES: set[str] = {"video/mp4", "video/webm", "video/quicktime"}
-MAX_VIDEO_DURATION_SECONDS: int = int(os.environ.get("MAX_VIDEO_DURATION_SECONDS", "10"))
+MAX_VIDEO_DURATION_SECONDS: int = int(os.environ.get("MAX_VIDEO_DURATION_SECONDS", "120"))
 MAX_FRAMES: int = int(os.environ.get("MAX_FRAMES", "40"))
 VIDEO_FPS: int = int(os.environ.get("VIDEO_FPS", "4"))
