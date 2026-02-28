@@ -7,7 +7,7 @@ from PIL import Image
 
 from app import config
 
-TARGET_SIZE = 100 * 1024  # 100 KB
+TARGET_SIZE = 40 * 1024  # 40 KB — smaller frames = faster vision encoder
 
 
 def _compress_frame(frame_bgr, target_size: int = TARGET_SIZE) -> tuple[bytes, str]:
@@ -15,8 +15,8 @@ def _compress_frame(frame_bgr, target_size: int = TARGET_SIZE) -> tuple[bytes, s
     frame_rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
     img = Image.fromarray(frame_rgb)
 
-    # Scale down if very large
-    max_dim = 1024
+    # Scale down — 512px is sufficient for the 2B model's vision encoder
+    max_dim = 512
     while True:
         resized = img.copy()
         resized.thumbnail((max_dim, max_dim))
@@ -75,26 +75,19 @@ def extract_frames(video_bytes: bytes) -> list[tuple[bytes, str]]:
                 f"{config.MAX_VIDEO_DURATION_SECONDS}s limit."
             )
 
-        # Calculate which frames to extract at VIDEO_FPS
+        # Seek directly to each target frame instead of reading every frame
         frame_interval = source_fps / config.VIDEO_FPS
         frames: list[tuple[bytes, str]] = []
-        frame_idx = 0
-        next_extract = 0.0
 
-        while True:
+        target_idx = 0.0
+        while target_idx < frame_count and len(frames) < config.MAX_FRAMES:
+            cap.set(cv2.CAP_PROP_POS_FRAMES, int(target_idx))
             ret, frame = cap.read()
             if not ret:
                 break
-
-            if frame_idx >= next_extract:
-                jpeg_bytes, mime = _compress_frame(frame)
-                frames.append((jpeg_bytes, mime))
-                next_extract += frame_interval
-
-                if len(frames) >= config.MAX_FRAMES:
-                    break
-
-            frame_idx += 1
+            jpeg_bytes, mime = _compress_frame(frame)
+            frames.append((jpeg_bytes, mime))
+            target_idx += frame_interval
 
         cap.release()
 

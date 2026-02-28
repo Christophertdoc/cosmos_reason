@@ -305,13 +305,17 @@
                             loadingIndicator.hidden = true;
                         }
 
+                        // Strip <answer> / </answer> tags from content
+                        var token = parsed.token
+                            .replace(/<\/?answer>/g, "");
+
                         if (parsed.type === "thinking") {
                             ensureThinkBlock();
-                            thinkBlock.textContent += parsed.token;
+                            thinkBlock.textContent += token;
                         } else {
                             // "content" type, or fallback
                             ensureContentBlock();
-                            contentBlock.textContent += parsed.token;
+                            if (token) contentBlock.textContent += token;
                         }
                     }
 

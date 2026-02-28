@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 import time
@@ -113,7 +114,7 @@ async def analyze(video: UploadFile, prompt: str = Form("")) -> JSONResponse:
 
     # Extract frames from video
     try:
-        frames = extract_frames(video_bytes)
+        frames = await asyncio.to_thread(extract_frames, video_bytes)
     except ValueError as exc:
         return JSONResponse(
             status_code=400,
@@ -183,7 +184,7 @@ async def analyze_stream(video: UploadFile, prompt: str = Form("")):
 
     # Extract frames from video
     try:
-        frames = extract_frames(video_bytes)
+        frames = await asyncio.to_thread(extract_frames, video_bytes)
     except ValueError as exc:
         return JSONResponse(
             status_code=400,
