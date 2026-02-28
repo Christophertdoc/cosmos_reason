@@ -11,7 +11,7 @@ class LlamaClientError(Exception):
     """Raised when the llama-server is unreachable or returns an error."""
 
 
-SYSTEM_PROMPT = "You are a helpful assistant."
+SYSTEM_PROMPT = "You are a helpful assistant that analyzes video content."
 
 # NVIDIA's documented format to trigger chain-of-thought reasoning
 # Matches the exact wording from the API docs curl example
@@ -40,9 +40,13 @@ async def close_client() -> None:
         _client = None
 
 
-def _build_payload(image_bytes: bytes, mime_type: str, prompt: str, *, stream: bool = False) -> dict:
-    image_b64 = base64.b64encode(image_bytes).decode("ascii")
-    data_url = f"data:{mime_type};base64,{image_b64}"
+def _build_payload(frames: list[tuple[bytes, str]], prompt: str, *, stream: bool = False) -> dict:
+    content = []
+    for frame_bytes, mime_type in frames:
+        b64 = base64.b64encode(frame_bytes).decode("ascii")
+        data_url = f"data:{mime_type};base64,{b64}"
+        content.append({"type": "image_url", "image_url": {"url": data_url}})
+    content.append({"type": "text", "text": prompt + REASONING_SUFFIX})
 
     return {
         "messages": [
@@ -52,10 +56,7 @@ def _build_payload(image_bytes: bytes, mime_type: str, prompt: str, *, stream: b
             },
             {
                 "role": "user",
-                "content": [
-                    {"type": "image_url", "image_url": {"url": data_url}},
-                    {"type": "text", "text": prompt + REASONING_SUFFIX},
-                ],
+                "content": content,
             },
         ],
         "max_tokens": config.MAX_GENERATION_TOKENS,
@@ -65,9 +66,9 @@ def _build_payload(image_bytes: bytes, mime_type: str, prompt: str, *, stream: b
     }
 
 
-async def analyze_image(image_bytes: bytes, mime_type: str, prompt: str) -> str:
-    """Send an image and prompt to llama-server and return the model's response text."""
-    payload = _build_payload(image_bytes, mime_type, prompt)
+async def analyze_video(frames: list[tuple[bytes, str]], prompt: str) -> str:
+    """Send video frames and prompt to llama-server and return the model's response text."""
+    payload = _build_payload(frames, prompt)
 
     try:
         client = _get_client()
@@ -88,8 +89,8 @@ async def analyze_image(image_bytes: bytes, mime_type: str, prompt: str) -> str:
         raise LlamaClientError("Unexpected response from inference backend") from exc
 
 
-async def stream_analyze_image(
-    image_bytes: bytes, mime_type: str, prompt: str
+async def stream_analyze_video(
+    frames: list[tuple[bytes, str]], prompt: str
 ) -> AsyncGenerator[dict, None]:
     """Stream tokens from llama-server as an async generator.
 
@@ -98,7 +99,7 @@ async def stream_analyze_image(
     delta.reasoning_content and answer tokens in delta.content.
     Without it, everything comes through delta.content with inline tags.
     """
-    payload = _build_payload(image_bytes, mime_type, prompt, stream=True)
+    payload = _build_payload(frames, prompt, stream=True)
     url = f"{config.LLAMA_SERVER_URL}/v1/chat/completions"
 
     try:

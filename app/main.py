@@ -14,8 +14,8 @@ from sse_starlette.sse import EventSourceResponse
 import httpx
 
 from app import config
-from app.image_utils import compress_image
-from app.llama_client import LlamaClientError, analyze_image, stream_analyze_image, close_client
+from app.video_utils import extract_frames
+from app.llama_client import LlamaClientError, analyze_video, stream_analyze_video, close_client
 
 logger = logging.getLogger(__name__)
 
@@ -73,25 +73,25 @@ async def healthz() -> JSONResponse:
 
 
 @app.post("/api/analyze")
-async def analyze(image: UploadFile, prompt: str = Form("")) -> JSONResponse:
-    # Validate image MIME type
-    if image.content_type not in config.ALLOWED_MIME_TYPES:
+async def analyze(video: UploadFile, prompt: str = Form("")) -> JSONResponse:
+    # Validate video MIME type
+    if video.content_type not in config.ALLOWED_MIME_TYPES:
         return JSONResponse(
             status_code=400,
             content={
                 "error": f"Unsupported file type. Allowed: {', '.join(sorted(config.ALLOWED_MIME_TYPES))}",
-                "field": "image",
+                "field": "video",
             },
         )
 
-    # Read and validate image size
-    image_bytes = await image.read()
-    if len(image_bytes) > config.MAX_UPLOAD_BYTES:
+    # Read and validate video size
+    video_bytes = await video.read()
+    if len(video_bytes) > config.MAX_UPLOAD_BYTES:
         return JSONResponse(
             status_code=400,
             content={
                 "error": f"File size exceeds the {config.MAX_UPLOAD_MB} MB limit",
-                "field": "image",
+                "field": "video",
             },
         )
 
@@ -111,13 +111,19 @@ async def analyze(image: UploadFile, prompt: str = Form("")) -> JSONResponse:
             },
         )
 
-    # Compress image if over 100 KB
-    image_bytes, mime_type = compress_image(image_bytes, image.content_type)
+    # Extract frames from video
+    try:
+        frames = extract_frames(video_bytes)
+    except ValueError as exc:
+        return JSONResponse(
+            status_code=400,
+            content={"error": str(exc), "field": "video"},
+        )
 
     # Call llama-server
     start = time.monotonic()
     try:
-        answer = await analyze_image(image_bytes, mime_type, prompt)
+        answer = await analyze_video(frames, prompt)
     except LlamaClientError:
         return JSONResponse(
             status_code=503,
@@ -137,25 +143,25 @@ async def analyze(image: UploadFile, prompt: str = Form("")) -> JSONResponse:
 
 
 @app.post("/api/analyze/stream")
-async def analyze_stream(image: UploadFile, prompt: str = Form("")):
-    # Validate image MIME type
-    if image.content_type not in config.ALLOWED_MIME_TYPES:
+async def analyze_stream(video: UploadFile, prompt: str = Form("")):
+    # Validate video MIME type
+    if video.content_type not in config.ALLOWED_MIME_TYPES:
         return JSONResponse(
             status_code=400,
             content={
                 "error": f"Unsupported file type. Allowed: {', '.join(sorted(config.ALLOWED_MIME_TYPES))}",
-                "field": "image",
+                "field": "video",
             },
         )
 
-    # Read and validate image size
-    image_bytes = await image.read()
-    if len(image_bytes) > config.MAX_UPLOAD_BYTES:
+    # Read and validate video size
+    video_bytes = await video.read()
+    if len(video_bytes) > config.MAX_UPLOAD_BYTES:
         return JSONResponse(
             status_code=400,
             content={
                 "error": f"File size exceeds the {config.MAX_UPLOAD_MB} MB limit",
-                "field": "image",
+                "field": "video",
             },
         )
 
@@ -175,13 +181,19 @@ async def analyze_stream(image: UploadFile, prompt: str = Form("")):
             },
         )
 
-    # Compress image if over 100 KB
-    image_bytes, mime_type = compress_image(image_bytes, image.content_type)
+    # Extract frames from video
+    try:
+        frames = extract_frames(video_bytes)
+    except ValueError as exc:
+        return JSONResponse(
+            status_code=400,
+            content={"error": str(exc), "field": "video"},
+        )
 
     async def event_generator():
         start = time.monotonic()
         try:
-            async for event in stream_analyze_image(image_bytes, mime_type, prompt):
+            async for event in stream_analyze_video(frames, prompt):
                 yield json.dumps(event)
         except LlamaClientError:
             yield json.dumps({"error": "Inference backend is temporarily unavailable"})

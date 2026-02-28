@@ -1,0 +1,12 @@
+Collecting opencv-python-headless
+  Using cached opencv_python_headless-4.13.0.92-cp37-abi3-macosx_13_0_arm64.whl.metadata (19 kB)
+Collecting numpy>=2 (from opencv-python-headless)
+  Downloading numpy-2.4.2-cp313-cp313-macosx_14_0_arm64.whl.metadata (6.6 kB)
+Using cached opencv_python_headless-4.13.0.92-cp37-abi3-macosx_13_0_arm64.whl (46.2 MB)
+Downloading numpy-2.4.2-cp313-cp313-macosx_14_0_arm64.whl (5.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.2/5.2 MB 48.9 MB/s eta 0:00:00
+Installing collected packages: numpy, opencv-python-headless
+Successfully installed numpy-2.4.2 opencv-python-headless-4.13.0.92
+
+[notice] A new release of pip is available: 24.3.1 -> 26.0.1
+[notice] To update, run: python3.13 -m pip install --upgrade pip

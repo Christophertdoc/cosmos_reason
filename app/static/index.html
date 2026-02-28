@@ -11,13 +11,13 @@
 </head>
 <body>
     <div class="upload-zone" id="uploadZone">
-        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" hidden>
+        <input type="file" id="fileInput" accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov" hidden>
         <div class="upload-placeholder" id="uploadPlaceholder">
-            <span class="upload-icon">&#128247;</span>
-            <p>Drag image here or click to upload</p>
-            <p class="upload-hint">JPEG, PNG, or WebP (max 8 MB)</p>
+            <span class="upload-icon">&#127909;</span>
+            <p>Drag video here or click to upload</p>
+            <p class="upload-hint">MP4, WebM, or MOV (max 50 MB, 10s)</p>
         </div>
-        <img id="imagePreview" class="image-preview" alt="Preview" hidden>
+        <video id="videoPreview" class="video-preview" muted loop playsinline hidden></video>
     </div>
 
     <div id="resultOverlay" class="result-overlay" hidden>
@@ -28,16 +28,16 @@
 
     <div id="loadingIndicator" class="loading" hidden>
         <div class="spinner"></div>
-        <span>Analyzing image...</span>
+        <span>Analyzing video...</span>
     </div>
 
     <div class="prompt-bar">
-        <textarea id="promptInput" rows="1" placeholder="Ask about the image..."></textarea>
+        <textarea id="promptInput" rows="1" placeholder="Ask about the video..."></textarea>
         <button id="analyzeBtn" type="button" aria-label="Analyze">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         </button>
         <div class="prompt-bar-errors">
-            <span class="error-message" id="imageError"></span>
+            <span class="error-message" id="videoError"></span>
             <span class="error-message" id="promptError"></span>
         </div>
     </div>
