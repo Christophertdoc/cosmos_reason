@@ -6,6 +6,8 @@ This project lets you run [NVIDIA's Cosmos Reason](https://huggingface.co/nvidia
 
 Upload an image, enter a text prompt, and receive a natural language response from the model ... all running on your own machine.
 
+![Demo](assets/example.gif)
+
 ## Prerequisites
 
 - **Python 3.11+**
